@@ -1,3 +1,25 @@
-*.DS_Store
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# environments
+.venv/
+venv/
+env/
+
+# editors / os
 .idea/
 */.idea/
+.vscode/
+*.DS_Store
+
+# model checkpoints and training runs
+*.pt
+*.pth
+checkpoints/
+runs/
