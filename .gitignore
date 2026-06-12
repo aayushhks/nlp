@@ -23,3 +23,4 @@ env/
 *.pth
 checkpoints/
 runs/
+results/figures/
