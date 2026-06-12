@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scratchlm"
+version = "0.1.0"
+description = "Autoregressive language models built from scratch, from logistic regression to a GPT-style transformer."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "aayushhks", email = "aayushhks03@gmail.com" }]
+keywords = ["nlp", "transformer", "language-model", "from-scratch", "gpt"]
+dependencies = [
+    "torch>=2.0",
+    "numpy>=1.24",
+    "nltk>=3.8",
+    "datasets>=2.14",
+    "transformers>=4.30",
+    "matplotlib>=3.7",
+    "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.1"]
+
+[tool.setuptools.packages.find]
+include = ["scratchlm*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
