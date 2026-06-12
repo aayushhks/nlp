@@ -1,6 +1,6 @@
 import torch
 
-from scratchlm.sampling import generate, sample_next_token
+from scratchlm.sampling import generate, generate_stream, sample_next_token
 from scratchlm.tokenizer import BPETokenizer
 from scratchlm.transformer import MultiHeadTransformer
 
@@ -26,3 +26,14 @@ def test_generate_returns_text():
 
     out = generate(model, tokenizer, "the quick", max_new_tokens=8, temperature=0.9)
     assert isinstance(out, str) and len(out) > 0
+
+
+def test_generate_stream_yields_incremental_text():
+    torch.manual_seed(0)
+    tokenizer = BPETokenizer(vocab_size=80)
+    tokenizer.train("the quick brown fox jumps over the lazy dog " * 20)
+    model = MultiHeadTransformer(tokenizer.vocab_size, 32, context_len=16, num_heads=4, num_layers=1)
+
+    outputs = list(generate_stream(model, tokenizer, "the quick", max_new_tokens=6, temperature=0.9))
+    assert 1 <= len(outputs) <= 6
+    assert all(isinstance(text, str) for text in outputs)
