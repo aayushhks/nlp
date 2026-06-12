@@ -118,6 +118,18 @@ All neural models beat the statistical baseline. At this tiny scale the
 recurrent models edge out the transformer, which only pulls ahead with more data
 and epochs (`--preset full`).
 
+## Demo
+
+An interactive Gradio app loads a checkpoint and lets you tune the prompt and the
+decoding settings (temperature, top-k, top-p, greedy):
+
+```bash
+pip install -e ".[demo]"
+python app/demo.py --checkpoint checkpoints/transformer_tiny.pt
+```
+
+See [app/README.md](app/README.md) for details.
+
 ## Testing
 
 ```bash
