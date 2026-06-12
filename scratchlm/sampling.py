@@ -43,7 +43,7 @@ def sample_next_token(logits, temperature=1.0, top_k=None, top_p=None, greedy=Fa
 
 
 @torch.no_grad()
-def generate(
+def generate_stream(
     model,
     tokenizer,
     prompt,
@@ -54,7 +54,7 @@ def generate(
     greedy=False,
     device="cpu",
 ):
-    """Sample a continuation of ``prompt`` one token at a time."""
+    """Yield the decoded text after each newly sampled token, for live streaming."""
     model.eval()
     model.to(device)
 
@@ -71,8 +71,27 @@ def generate(
         logits = model.logits(model_input)[:, -1, :]
         next_id = sample_next_token(logits, temperature, top_k, top_p, greedy)
         tokens = torch.cat([tokens, torch.tensor([[next_id]], device=device)], dim=1)
+        yield tokenizer.decode(tokens[0].tolist())
 
         if eos_id is not None and next_id == eos_id:
             break
 
-    return tokenizer.decode(tokens[0].tolist())
+
+def generate(
+    model,
+    tokenizer,
+    prompt,
+    max_new_tokens=50,
+    temperature=0.8,
+    top_k=None,
+    top_p=None,
+    greedy=False,
+    device="cpu",
+):
+    """Sample a continuation of ``prompt`` and return the final text."""
+    text = tokenizer.decode(tokenizer.encode(prompt))
+    for text in generate_stream(
+        model, tokenizer, prompt, max_new_tokens, temperature, top_k, top_p, greedy, device
+    ):
+        pass
+    return text
