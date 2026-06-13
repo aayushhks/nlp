@@ -1,0 +1,9 @@
+services:
+  demo:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: scratchlm-demo
+    ports:
+      - "7860:7860"
+    restart: unless-stopped
