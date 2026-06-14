@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
-      name: production
+      name: aws-cloudfront
       url: https://d3eoqir4vpoh43.cloudfront.net
     steps:
       - name: Confirm live (AWS EC2 + CloudFront)
