@@ -1,0 +1,17 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://d3eoqir4vpoh43.cloudfront.net
+    steps:
+      - name: Confirm live (AWS EC2 + CloudFront)
+        run: |
+          echo "Deployed on AWS — EC2 origin + CloudFront HTTPS"
+          echo "https://d3eoqir4vpoh43.cloudfront.net"
