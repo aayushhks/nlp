@@ -16,7 +16,7 @@ from scratchlm.models import build_lm
 from scratchlm.sampling import generate, generate_stream
 
 CHECKPOINT_DIR = "checkpoints"
-REPO_URL = "https://github.com/aayushhks/transformer-autoregressive-lm-from-scratch"
+REPO_URL = "https://github.com/aayushhks/transformer-LM-from-scratch"
 
 # Cache loaded models so switching back to a checkpoint is instant.
 _CACHE = {}
@@ -82,6 +82,27 @@ def compare_strategies(checkpoint, prompt, max_new_tokens):
     return greedy_out, temperature_out, nucleus_out
 
 
+def _theme():
+    import gradio as gr
+
+    return gr.themes.Soft(
+        primary_hue="indigo",
+        neutral_hue="slate",
+        font=[gr.themes.GoogleFont("Inter"), "system-ui", "sans-serif"],
+        radius_size="lg",
+        spacing_size="md",
+    )
+
+
+CSS = """
+.gradio-container { max-width: 1080px !important; margin: 0 auto !important; }
+#hero { text-align: center; margin: 6px 0 2px; }
+#hero h1 { font-size: 2.1rem; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+#hero p  { color: var(--body-text-color-subdued); margin: 6px 0 0; font-size: 1.02rem; }
+#cta { text-align: center; margin-top: 14px; opacity: 0.75; font-size: 0.9rem; }
+"""
+
+
 def build_app(checkpoint_dir=CHECKPOINT_DIR):
     import gradio as gr
 
@@ -92,23 +113,40 @@ def build_app(checkpoint_dir=CHECKPOINT_DIR):
 
     with gr.Blocks(title="scratchlm") as app:
         gr.Markdown(
-            "# scratchlm — text generation\n"
-            "Sample from autoregressive language models built from scratch: a BPE "
-            f"tokenizer, RNN/LSTM, and a GPT-style transformer. [Source]({REPO_URL})."
+            "# 🧠 scratchlm\n"
+            "Autoregressive text generation — **built from scratch**: "
+            "BPE tokenizer · RNN / LSTM · GPT-style transformer · live token streaming.",
+            elem_id="hero",
         )
-        checkpoint = gr.Dropdown(choices=checkpoints, value=default, label="checkpoint")
+        checkpoint = gr.Dropdown(
+            choices=checkpoints, value=default, label="Model checkpoint",
+            info="Switch between the trained models",
+        )
 
-        with gr.Tab("Generate"):
-            prompt = gr.Textbox(label="prompt", value="The world", lines=2)
-            with gr.Row():
-                max_new_tokens = gr.Slider(1, 200, value=60, step=1, label="max new tokens")
-                temperature = gr.Slider(0.1, 2.0, value=0.8, step=0.1, label="temperature")
-            with gr.Row():
-                top_k = gr.Slider(0, 100, value=0, step=1, label="top-k (0 = off)")
-                top_p = gr.Slider(0.0, 1.0, value=1.0, step=0.05, label="top-p (1.0 = off)")
-            greedy = gr.Checkbox(value=False, label="greedy (ignore sampling settings)")
-            generate_button = gr.Button("generate", variant="primary")
-            output = gr.Textbox(label="generation", lines=6)
+        with gr.Tab("✨ Generate"):
+            with gr.Row(equal_height=False):
+                with gr.Column(scale=3):
+                    prompt = gr.Textbox(
+                        label="Prompt", value="The world", lines=3,
+                        placeholder="Type a prompt to continue…",
+                    )
+                    with gr.Row():
+                        max_new_tokens = gr.Slider(1, 200, value=60, step=1, label="Max new tokens")
+                        temperature = gr.Slider(
+                            0.1, 2.0, value=0.8, step=0.1, label="Temperature",
+                            info="Higher = more random",
+                        )
+                    with gr.Accordion("Advanced sampling", open=False):
+                        with gr.Row():
+                            top_k = gr.Slider(0, 100, value=0, step=1, label="Top-k", info="0 = off")
+                            top_p = gr.Slider(0.0, 1.0, value=1.0, step=0.05, label="Top-p", info="1.0 = off")
+                        greedy = gr.Checkbox(value=False, label="Greedy decoding (ignore sampling)")
+                    generate_button = gr.Button("Generate", variant="primary", size="lg")
+                with gr.Column(scale=4):
+                    output = gr.Textbox(
+                        label="Generation", lines=16,
+                        placeholder="Generated text streams in here…",
+                    )
             gr.Examples(
                 [["The world"], ["In the beginning"], ["Scientists have discovered"]],
                 inputs=[prompt],
@@ -119,20 +157,26 @@ def build_app(checkpoint_dir=CHECKPOINT_DIR):
                 output,
             )
 
-        with gr.Tab("Compare strategies"):
-            gr.Markdown("See how the same prompt diverges under different decoding strategies.")
-            compare_prompt = gr.Textbox(label="prompt", value="The world", lines=2)
-            compare_tokens = gr.Slider(1, 200, value=60, step=1, label="max new tokens")
-            compare_button = gr.Button("compare", variant="primary")
+        with gr.Tab("⚖️ Compare strategies"):
+            gr.Markdown("See how the **same prompt** diverges under different decoding strategies.")
             with gr.Row():
-                greedy_box = gr.Textbox(label="greedy", lines=6)
-                temperature_box = gr.Textbox(label="temperature 0.8", lines=6)
-                nucleus_box = gr.Textbox(label="nucleus p=0.9", lines=6)
+                compare_prompt = gr.Textbox(label="Prompt", value="The world", lines=2, scale=4)
+                compare_tokens = gr.Slider(1, 200, value=60, step=1, label="Max new tokens", scale=2)
+            compare_button = gr.Button("Compare", variant="primary", size="lg")
+            with gr.Row(equal_height=True):
+                greedy_box = gr.Textbox(label="🟦 Greedy", lines=12)
+                temperature_box = gr.Textbox(label="🟨 Temperature 0.8", lines=12)
+                nucleus_box = gr.Textbox(label="🟩 Nucleus · p=0.9", lines=12)
             compare_button.click(
                 compare_strategies,
                 [checkpoint, compare_prompt, compare_tokens],
                 [greedy_box, temperature_box, nucleus_box],
             )
+
+        gr.Markdown(
+            f"Built from scratch with PyTorch · [source code]({REPO_URL}) · deployed on AWS",
+            elem_id="cta",
+        )
 
     return app
 
@@ -142,7 +186,7 @@ def main():
     parser.add_argument("--checkpoint_dir", default=CHECKPOINT_DIR)
     parser.add_argument("--share", action="store_true", help="create a public gradio link")
     args = parser.parse_args()
-    build_app(args.checkpoint_dir).launch(share=args.share)
+    build_app(args.checkpoint_dir).launch(theme=_theme(), css=CSS, share=args.share)
 
 
 if __name__ == "__main__":
