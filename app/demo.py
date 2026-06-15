@@ -113,8 +113,8 @@ def build_app(checkpoint_dir=CHECKPOINT_DIR):
 
     with gr.Blocks(title="scratchlm") as app:
         gr.Markdown(
-            "# 🧠 scratchlm\n"
-            "Autoregressive text generation — **built from scratch**: "
+            "# scratchlm\n"
+            "Autoregressive text generation, **built from scratch**: "
             "BPE tokenizer · RNN / LSTM · GPT-style transformer · live token streaming.",
             elem_id="hero",
         )
@@ -123,7 +123,7 @@ def build_app(checkpoint_dir=CHECKPOINT_DIR):
             info="Switch between the trained models",
         )
 
-        with gr.Tab("✨ Generate"):
+        with gr.Tab("Generate"):
             with gr.Row(equal_height=False):
                 with gr.Column(scale=3):
                     prompt = gr.Textbox(
@@ -157,16 +157,16 @@ def build_app(checkpoint_dir=CHECKPOINT_DIR):
                 output,
             )
 
-        with gr.Tab("⚖️ Compare strategies"):
+        with gr.Tab("Compare strategies"):
             gr.Markdown("See how the **same prompt** diverges under different decoding strategies.")
             with gr.Row():
                 compare_prompt = gr.Textbox(label="Prompt", value="The world", lines=2, scale=4)
                 compare_tokens = gr.Slider(1, 200, value=60, step=1, label="Max new tokens", scale=2)
             compare_button = gr.Button("Compare", variant="primary", size="lg")
             with gr.Row(equal_height=True):
-                greedy_box = gr.Textbox(label="🟦 Greedy", lines=12)
-                temperature_box = gr.Textbox(label="🟨 Temperature 0.8", lines=12)
-                nucleus_box = gr.Textbox(label="🟩 Nucleus · p=0.9", lines=12)
+                greedy_box = gr.Textbox(label="Greedy", lines=12)
+                temperature_box = gr.Textbox(label="Temperature 0.8", lines=12)
+                nucleus_box = gr.Textbox(label="Nucleus (p=0.9)", lines=12)
             compare_button.click(
                 compare_strategies,
                 [checkpoint, compare_prompt, compare_tokens],
